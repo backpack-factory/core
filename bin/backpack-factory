@@ -3,11 +3,9 @@
 const path = require('path')
 const pkg = require('../package.json')
 
-const defaultCommand = 'dev'
+const defaultCommand = 'run'
 const commands = new Set([
   defaultCommand,
-  'build',
-  'run',
   'inspect'
 ])
 
