@@ -6,7 +6,8 @@ const pkg = require('../package.json')
 const defaultCommand = 'run'
 const commands = new Set([
   defaultCommand,
-  'inspect'
+  'inspect',
+  'get'
 ])
 
 let cmd = process.argv[2]

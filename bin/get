@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+const fs = require('fs')
+const path = require('path')
+const rm = require('rimraf').sync
+const { spawnSync } = require('child_process')
+
+const download = require('download-git-repo')
+
+const names = process.argv.slice(2)
+
+if (names.length === 0) {
+  console.log('!> No pattern names were given.')
+  process.exit(0)
+}
+
+const basePatternDir = path.join(process.env['APPDATA'], 'backpack-factory/patterns')
+
+for (let name of names) {
+  const repo = 'backpack-factory/' + name
+  const dir = path.join(basePatternDir, name)
+  console.log('-> Getting pattern:', name)
+  if (fs.existsSync(dir)) rm(dir)
+  download(repo, dir, {}, err => {
+    if (err) return console.error('Failed to download repo ' + name + ': ' + err.message.trim())
+    let { error } = spawnSync('npm i', { cwd: dir, shell: true })
+    if (error) console.error('Failed to install dependencies for pattern ' + name + ': ' + error.message.trim())
+    console.log('->', name, 'installed!')
+  })
+}

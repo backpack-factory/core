@@ -4,6 +4,7 @@ const { mergeDeep } = require('./utils')
 
 const Loader = {}
 
+const basePatternDir = path.join(process.env['APPDATA'], 'backpack-factory/patterns')
 const configFileName = 'factory.config.js'
 const defaultPattern = 'base-pattern'
 
@@ -18,7 +19,7 @@ Loader.getModule = function (path, defaultValue = {}) {
 
 Loader.getPattern = function (patternName) {
   // console.log('> Loading', patternName)
-  let patternPath = path.join(__dirname, '../patterns', patternName)
+  let patternPath = path.join(basePatternDir, patternName)
   if (!fs.existsSync(patternPath)) {
     console.warn('Unknown pattern:', patternName)
     return {}
