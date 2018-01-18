@@ -2,7 +2,7 @@
   "name": "backpack-factory",
   "version": "0.1.0",
   "bin": {
-    "bakery": "./bin/backpack-factory"
+    "backpack-factory": "./bin/backpack-factory"
   },
   "dependencies": {
     "webpack": "^3.10.0"
