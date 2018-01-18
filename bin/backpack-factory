@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+
+const path = require('path')
+const pkg = require('../package.json')
+
+const defaultCommand = 'dev'
+const commands = new Set([
+  defaultCommand,
+  'build',
+  'run',
+  'inspect'
+])
+
+let cmd = process.argv[2]
+
+if (new Set(['--version', '-v']).has(cmd)) {
+  console.log(pkg.name + ' v' + pkg.version)
+  process.exit(0)
+}
+
+if (new Set(['--help', '-h']).has(cmd)) {
+  console.log(`
+    Usage
+      $ ${pkg.name} <command>
+    Available commands
+      ${Array.from(commands).join(', ')}
+    For more information run a command with the --help flag
+      $ ${pkg.name} --help
+  `)
+  process.exit(0)
+}
+
+let bin
+
+if (new Set(['dev', 'build']).has(cmd)) {
+  bin = path.resolve(path.join(__dirname, 'run'))
+} else {
+  if (commands.has(cmd)) {
+    process.argv.splice(2, 1)
+  } else {
+    cmd = defaultCommand
+  }
+
+  bin = path.resolve(path.join(__dirname, cmd))
+}
+
+process.on('SIGINT', process.exit)
+
+require(bin)

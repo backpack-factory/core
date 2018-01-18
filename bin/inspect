@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+const fs = require('fs')
+const path = require('path')
+const util = require('util')
+
+const { getConfig } = require('../src/loader')
+const config = getConfig({ env: 'development' })
+
+console.log(util.inspect(config.webpack, { showHidden: true, depth: null, colors: true }))
+
+fs.writeFileSync(
+  path.resolve('webpack.config.txt'),
+  util.inspect(config.webpack, { depth: null })
+)

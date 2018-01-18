@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+const webpack = require('webpack')
+const { getConfig } = require('../src/loader')
+
+const cmd = process.argv[2] || 'dev'
+const config = getConfig({
+  env: process.env.NODE_ENV || (cmd === 'dev' ? 'development' : 'production')
+})
+
+const script = config.scripts[cmd]
+if (script && typeof script === 'function') {
+  script(config, webpack)
+} else {
+  console.error('!> Unknown command:', cmd)
+}
