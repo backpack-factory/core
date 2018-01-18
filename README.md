@@ -80,3 +80,7 @@ All the CLI commands are provided by the patterns in the `scripts` property. You
 
 ## FAQ
 None
+
+## Todos
+- Make a CLI command to download patterns
+- Add all paths to the config objects
