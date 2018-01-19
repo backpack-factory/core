@@ -41,6 +41,7 @@ function getPattern (pattern, cb) {
   if (isLocalPath(pattern)) { // Check if the pattern is local
     let name = pattern.split(/\/|\\/).pop()
     let dir = path.join(basePatternDir, name)
+    if (fs.existsSync(dir)) rm(dir)
     ncp(pattern, dir, function (err) {
       if (err) { // If copy failed
         console.error('Failed to copy local pattern ' + pattern + ': ' + err.message.trim())
