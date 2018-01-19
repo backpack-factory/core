@@ -89,5 +89,4 @@ This command allows you to add pattern to the factory to be used later. For inst
 None yet
 
 ## Todos
-- Make a CLI command to download patterns
-- Add all paths to the config objects
+- Test it all
