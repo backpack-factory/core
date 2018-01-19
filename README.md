@@ -10,6 +10,7 @@ The Backpack Factory is a building tool using using webpack. It is made to be ve
   - [Patterns](Patterns)
 - [CLI Commands](CLI-Commands)
 - [FAQ](FAQ)
+- [Todos](Todos)
 
 ## How to use
 First you need to install the core of factory:
@@ -76,10 +77,16 @@ A Pattern is a directory named after the pattern's name. It can contained pretty
 Look for the basic patterns to have some examples.
 
 ## CLI Commands
-All the CLI commands are provided by the patterns in the `scripts` property. You can use `backpack-factory run scriptName` to call `scripts.scriptName`.
+#### backpack-facrory run [scriptName]
+This command is the one launch scripts from your pattern. Just type `backpack-factory run scriptName` to call `scripts.scriptName`.
+
+`backpack-factory build` and `backpack-factory dev` are shortcuts for `backpack-factory run build` and `backpack-factory run dev`.
+
+#### backpack-facrory get [patternName]
+This command allows you to add pattern to the factory to be used later. For instance type `backpack-facrory get base-pattern` to download and setup [base pattern](https://github.com/backpack-factory/base-pattern).
 
 ## FAQ
-None
+None yet
 
 ## Todos
 - Make a CLI command to download patterns
