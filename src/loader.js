@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
-const { merge } = require('lodash')
+const { mergeWith, isArray } = require('lodash')
 
 const Loader = {}
 
@@ -14,6 +14,12 @@ function getPatternsList (config) {
   list = Array.isArray(list) ? list : [list]
   if (config.pattern) list.push(config.pattern)
   return list
+}
+
+function merge (...args) {
+  return mergeWith(...args, (objValue, srcValue) => {
+    if (isArray(objValue)) return objValue.concat(srcValue)
+  })
 }
 
 Loader.getModule = function (path, defaultValue = {}) {
