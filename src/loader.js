@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const webpack = require('webpack')
 const { mergeDeep } = require('./utils')
 
 const Loader = {}
@@ -49,7 +50,7 @@ Loader.applyPattern = function (pattern, config = {}) {
   // Merge the config and the pattern
   config = mergeDeep({}, config, pattern)
   if (pattern.updateConfig) {
-    config = pattern.updateConfig(config)
+    config = pattern.updateConfig(config, webpack)
   }
   // Add the pattern's path to paths
   config.paths.patterns.unshift(pattern.root)
