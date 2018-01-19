@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
-const { mergeDeep } = require('./utils')
+const { merge } = require('lodash')
 
 const Loader = {}
 
@@ -49,7 +49,7 @@ Loader.applyPattern = function (pattern, config = {}) {
   // Apply dependencies first
   config = Loader.applyPatterns(pattern.patterns, config)
   // Merge the config and the pattern
-  config = mergeDeep({}, config, pattern)
+  config = merge({}, config, pattern)
   if (pattern.updateConfig) {
     config = pattern.updateConfig(config, webpack)
   }
@@ -76,7 +76,7 @@ Loader.getConfig = function (options = {}) {
   // Get the user config if it exists
   let userConfigPath = path.resolve(configFileName)
   let userConfig = Loader.getModule(userConfigPath)
-  userConfig = mergeDeep({}, options, userConfig)
+  userConfig = merge({}, options, userConfig)
   // Set name & root
   userConfig.name = userConfig.name || 'user-config'
   userConfig.root = userConfig.root || path.resolve('.')
