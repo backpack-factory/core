@@ -8,6 +8,13 @@ const basePatternDir = path.join(process.env['APPDATA'], 'backpack-factory/patte
 const configFileName = 'factory.config.js'
 const defaultPattern = 'base-pattern'
 
+function getPatternsList (config) {
+  let list = config.patterns || []
+  list = Array.isArray(list) ? list : [list]
+  if (config.pattern) list.push(config.pattern)
+  return list
+}
+
 Loader.getModule = function (path, defaultValue = {}) {
   if (fs.existsSync(path)) {
     let module = require(path)
@@ -19,54 +26,59 @@ Loader.getModule = function (path, defaultValue = {}) {
 
 Loader.getPattern = function (patternName) {
   // console.log('> Loading', patternName)
+  let pattern
+  // Get the pattern config if it exists
   let patternPath = path.join(basePatternDir, patternName)
   if (!fs.existsSync(patternPath)) {
     console.warn('Unknown pattern:', patternName)
-    return {}
+    pattern = { root: null }
+  } else {
+    pattern = Loader.getModule(path.join(patternPath, configFileName))
   }
-  let pattern = Loader.getModule(path.join(patternPath, configFileName))
-  // Set name & root
+  // Set name
   pattern.name = patternName
-  pattern.root = patternPath
-  // Get patterns
-  pattern.patterns = pattern.patterns || []
-  pattern.patterns = Array.isArray(pattern.patterns) ? pattern.patterns : [pattern.patterns]
-  if (pattern.pattern) pattern.patterns.push(pattern.pattern)
+  // Set patterns
+  pattern.patterns = getPatternsList(pattern)
+  // Return the pattern
   return pattern
 }
 
 Loader.applyPattern = function (pattern, config = {}) {
+  // Apply dependencies first
   config = Loader.applyPatterns(pattern.patterns, config)
+  // Merge the config and the pattern
   config = mergeDeep({}, config, pattern)
   if (pattern.updateConfig) {
     config = pattern.updateConfig(config)
   }
-  let modulePath = path.join(pattern.root, 'node_modules')
-  config.webpack.resolveLoader.modules.unshift(modulePath)
-  config.webpack.resolve.modules.unshift(modulePath)
-  config.webpack.target = pattern.target || config.webpack.target
+  // Add the pattern's path to paths
+  config.paths.patterns.unshift(pattern.root)
+  // Return the config
   return config
 }
 
 Loader.applyPatterns = function (patterns, config = {}) {
-  while (patterns.length > 0) {
-    let pattern = Loader.getPattern(patterns.pop())
+  for (let patternName of patterns) {
+    let pattern = Loader.getPattern(patternName)
     config = Loader.applyPattern(pattern, config)
   }
   return config
 }
 
 Loader.getConfig = function (options = {}) {
+  // Initialize the path property in options
+  options.paths = {
+    root: path.resolve('.'),
+    patterns: []
+  }
+  // Get the user config if it exists
   let userConfigPath = path.resolve(configFileName)
-  let userConfig = Loader.getModule(userConfigPath, {
-    pattern: defaultPattern
-  })
+  let userConfig = Loader.getModule(userConfigPath)
   userConfig = mergeDeep({}, options, userConfig)
-  userConfig.patterns = userConfig.patterns || []
-  userConfig.patterns = Array.isArray(userConfig.patterns) ? userConfig.patterns : [userConfig.patterns]
-  if (userConfig.pattern) userConfig.patterns.push(userConfig.pattern)
+  // Get or set the patterns
+  userConfig.patterns = getPatternsList(userConfig)
   if (userConfig.patterns.length === 0) userConfig.patterns.push(defaultPattern)
-  userConfig.root = userConfig.root || path.resolve('.')
+  // Apply the patterns
   return Loader.applyPattern(userConfig, userConfig)
 }
 
