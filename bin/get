@@ -1,10 +1,17 @@
 #!/usr/bin/env node
 const fs = require('fs')
+const ora = require('ora')
 const path = require('path')
+const { ncp } = require('ncp')
 const rm = require('rimraf').sync
 const { spawnSync } = require('child_process')
 
 const download = require('download-git-repo')
+
+const isLocalPath = (str) => /^[./]|(^[a-zA-Z]:)/.test(str)
+const hasSlash = (str) => str.indexOf('/') > -1
+
+const basePatternDir = path.join(process.env['APPDATA'], 'backpack-factory/patterns')
 
 const names = process.argv.slice(2)
 
@@ -13,17 +20,57 @@ if (names.length === 0) {
   process.exit(0)
 }
 
-const basePatternDir = path.join(process.env['APPDATA'], 'backpack-factory/patterns')
-
-for (let name of names) {
-  const repo = 'backpack-factory/' + name
-  const dir = path.join(basePatternDir, name)
-  console.log('-> Getting pattern:', name)
-  if (fs.existsSync(dir)) rm(dir)
-  download(repo, dir, {}, err => {
-    if (err) return console.error('Failed to download repo ' + name + ': ' + err.message.trim())
+function getPattern (pattern, cb) {
+  // Spinner
+  const spinner = ora(' Getting pattern ' + pattern)
+  // Function to be called after the download/copy
+  const setupPattern = function (name, dir) {
+    spinner.start()
     let { error } = spawnSync('npm i', { cwd: dir, shell: true })
-    if (error) console.error('Failed to install dependencies for pattern ' + name + ': ' + error.message.trim())
-    console.log('->', name, 'installed!')
+    spinner.stop()
+    if (error) { // If dependencies installation failed
+      console.error('Failed to install dependencies for pattern ' + name + ': ' + error.message.trim())
+      cb()
+    } else {
+      console.log('->', name, 'installed!')
+      cb()
+    }
+  }
+  // Download or Copy the pattern
+  spinner.start()
+  if (isLocalPath(pattern)) { // Check if the pattern is local
+    let name = pattern.split(/\/|\\/).pop()
+    let dir = path.join(basePatternDir, name)
+    ncp(pattern, dir, function (err) {
+      if (err) { // If copy failed
+        console.error('Failed to copy local pattern ' + pattern + ': ' + err.message.trim())
+        cb()
+      } else {
+        setupPattern(name, dir)
+      }
+    })
+  } else { // If the pattern is not local it is a repo
+    let name = hasSlash(pattern) ? pattern.split('/').pop() : pattern
+    let repo = hasSlash(pattern) ? pattern : 'backpack-factory/' + pattern
+    let dir = path.join(basePatternDir, name)
+    // Remove if local template exists
+    if (fs.existsSync(dir)) rm(dir)
+    download(repo, dir, {}, err => {
+      spinner.stop()
+      if (err) { // If download failed
+        console.error('Failed to download repo ' + repo + ': ' + err.message.trim())
+        cb()
+      } else {
+        setupPattern(name, dir)
+      }
+    })
+  }
+}
+
+function run () {
+  getPattern(names.pop(), function () {
+    if (names.length > 0) run()
   })
 }
+
+run()
