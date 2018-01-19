@@ -35,6 +35,7 @@ Loader.getPattern = function (patternName) {
     pattern = { root: null }
   } else {
     pattern = Loader.getModule(path.join(patternPath, configFileName))
+    pattern.root = patternPath
   }
   // Set name
   pattern.name = patternName
@@ -76,6 +77,9 @@ Loader.getConfig = function (options = {}) {
   let userConfigPath = path.resolve(configFileName)
   let userConfig = Loader.getModule(userConfigPath)
   userConfig = mergeDeep({}, options, userConfig)
+  // Set name & root
+  userConfig.name = userConfig.name || 'user-config'
+  userConfig.root = userConfig.root || path.resolve('.')
   // Get or set the patterns
   userConfig.patterns = getPatternsList(userConfig)
   if (userConfig.patterns.length === 0) userConfig.patterns.push(defaultPattern)
