@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
-const { mergeWith, isArray } = require('lodash')
+const { mergeWith, isArray, union } = require('lodash')
 
 const Loader = {}
 
@@ -18,7 +18,7 @@ function getPatternsList (config) {
 
 function merge (...args) {
   return mergeWith(...args, (objValue, srcValue) => {
-    if (isArray(objValue)) return objValue.concat(srcValue)
+    if (isArray(objValue)) return union(objValue, srcValue)
   })
 }
 

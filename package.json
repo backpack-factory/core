@@ -1,6 +1,6 @@
 {
   "name": "backpack-factory",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "bin": {
     "backpack-factory": "./bin/backpack-factory"
   },
